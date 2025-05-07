@@ -1,0 +1,23 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "display": "Vue 3 + Vite + TypeScript",
+  "description": "Vue 3 + Vite + TypeScript",
+  "typeAcquisition": {
+    "include": [
+      "vitest/globals",
+      "vitest/importMeta"
+    ]
+  },
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "auto-imports.d.ts"],
+  "exclude": ["src/**/__tests__/*"],
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  }
+}
