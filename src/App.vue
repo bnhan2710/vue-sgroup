@@ -1,13 +1,24 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import LoginForm from './components/LoginForm.vue'
+import AuthLayout from '@/layouts/auth.vue'
+import DefaultLayout from '@/layouts/default.vue'
 
+const route = useRoute();
+
+const layout = computed(() => {
+    if(route.meta.auth) {
+        return AuthLayout;
+    } else {
+        return DefaultLayout;
+    }      
+})
 
 </script>
 
 <template>
-    <LoginForm />
-    <!-- <RouterView /> -->
+    <component :is="layout">
+        <RouterView />
+    </component>
 </template>
 
 <style scoped>

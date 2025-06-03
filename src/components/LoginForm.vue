@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import router from '@/router'
 import { $post } from '@/apis'
+import { useAuthStore } from '@/stores/auth'
 
 const email = ref('')
 const password = ref('')
+const useauthStore = useAuthStore()
 
 function handleSubmit(event: Event) {
   event.preventDefault()
@@ -28,18 +30,17 @@ async function login() {
     return
   }
   // make API call to login
-  const response = await $post('auth/login', {
+
+  const response = await useauthStore.login({
     email: email.value,
     password: password.value
   })
-  
-  alert('Login successful!')
-  alert(`accessToken: ${response.data?.data.accessToken}`)
 
+  localStorage.setItem('accessToken', response.data?.accessToken)
 
-  localStorage.setItem('token', response.data?.token)
-
-  router.push('/home')
+  router.push('/')
+  console.log(router)
+  console.log('Login successful:', response.data)
 }
   catch (error) {
     console.error('Login failed:', error)
@@ -60,7 +61,6 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div :class="cn('flex flex-col gap-6', props.class)">
     <Card class="mx-auto w-full max-w-sm">
       <CardHeader>
         <CardTitle>Login to your account</CardTitle>
@@ -98,5 +98,4 @@ const props = defineProps<{
         </form>
       </CardContent>
     </Card>
-  </div>
 </template>
