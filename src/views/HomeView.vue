@@ -4,6 +4,9 @@ import TheWelcome from '../components/TheWelcome.vue'
 
 <template>
   <main>
-    <TheWelcome />
+    <!-- <TheWelcome />-->
+     <RouterLink to= "/about" class="text-blue-500 hover:underline">
+      </RouterLink>
   </main>
 </template>
+import { RouterLink } from 'vue-router';

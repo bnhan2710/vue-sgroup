@@ -3,54 +3,61 @@ import type { HTMLAttributes } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import router from '@/router'
 import { $post } from '@/apis'
+import { toast } from 'vue-sonner'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import { z } from 'zod'
 
-const email = ref('')
-const password = ref('')
+const registerSchema = z
+  .object({
+    email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters long')
+      .regex(/^(?=.*[A-Za-z])(?=.*\d)/, 'Password must contain at least one letter and one number'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
-function handleSubmit(event: Event) {
-  event.preventDefault()
-  register()
-}
+type RegisterForm = z.infer<typeof registerSchema>
 
-async function register() {
+const form = useForm<RegisterForm>({
+  validationSchema: toTypedSchema(registerSchema),
+  initialValues: {
+    email: '',
+    password: '',
+    confirmPassword: '',
+  },
+})
+
+const { isSubmitting, handleSubmit } = form
+
+const onSubmitHandler = handleSubmit(async (values: RegisterForm) => {
   try {
-    // validate email and password
-    if (!isEmailValid.value) {
-      alert('Invalid email format')
-      return
-    }
-    if (!isPasswordValid.value) {
-      alert(
-        'Password must be at least 8 characters long and contain at least one letter and one number',
-      )
-      return
-    }
+    console.log('Registering user:', values)
 
-    const username = email.value.split('@')[0]
 
-    const response = await $post('/auth/register', {
-      username: username,
-      email: email.value,
-      password: password.value,
-    })
 
-    console.log('Register successful:', response.data)
+    const username = values.email.split('@')[0]
+    // await $post('/auth/register', {
+    //   username: username,
+    //   email: values.email,
+    //   password: values.password,
+    // })
 
-    // Redirect to login page after successful registration
+
     await router.push({ name: 'Login' })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Register failed:', error)
-    alert('Register failed. Please try again.')
+    toast.error('Registration failed. Please try again.')
   }
-}
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
-const isEmailValid = computed(() => emailRegex.test(email.value))
-const isPasswordValid = computed(() => passwordRegex.test(password.value))
+})
 
 defineProps<{
   class?: HTMLAttributes['class']
@@ -64,35 +71,47 @@ defineProps<{
       <CardDescription> Enter your email below to Register to your account </CardDescription>
     </CardHeader>
     <CardContent>
-      <form>
-        <div class="flex flex-col gap-6">
-          <div class="grid gap-3">
-            <Label for="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              @input="email = $event.target.value"
-              required
-            />
-          </div>
-          <div class="grid gap-3">
-            <div class="flex items-center">
-              <Label for="password">Password</Label>
-              <a href="#" class="ml-auto inline-block text-sm underline-offset-4 hover:underline">
-                Forgot your password?
-              </a>
-            </div>
-            <Input id="password" type="password" @input="password = $event.target.value" required />
-          </div>
-          <div class="flex flex-col gap-3">
-            <Button type="submit" class="w-full" @click="handleSubmit"> Register </Button>
-            <Button variant="outline" class="w-full"> Login with Google </Button>
-          </div>
+      <form @submit.prevent="onSubmitHandler" class="space-y-6">
+        <FormField v-slot="{ componentField }" name="email">
+          <FormItem>
+            <FormLabel>Email</FormLabel>
+            <FormControl>
+              <Input type="email" placeholder="m@example.com" v-bind="componentField" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ componentField }" name="password">
+          <FormItem>
+            <FormLabel>Password</FormLabel>
+            <FormControl>
+              <Input type="password" v-bind="componentField" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ componentField }" name="confirmPassword">
+          <FormItem>
+            <FormLabel>Confirm Password</FormLabel>
+            <FormControl>
+              <Input type="password" placeholder="Confirm your password" v-bind="componentField" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <div class="flex flex-col gap-3">
+          <Button type="submit" class="w-full" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Registering...' : 'Register' }}
+          </Button>
+          <Button variant="outline" class="w-full" type="button"> Login with Google </Button>
         </div>
+
         <div class="mt-4 text-center text-sm">
-          Don't have an account?
-          <a href="#" class="underline underline-offset-4"> Sign up </a>
+          Already have an account?
+          <a href="/login" class="underline underline-offset-4"> Sign in </a>
         </div>
       </form>
     </CardContent>

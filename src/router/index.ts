@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useLocalStorage } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
-
+import AboutView from '@/views/AboutView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +23,10 @@ const router = createRouter({
     {
       name: 'Home',
       path: '/' , component: HomeView,
+    },
+    {
+      name: 'About',
+      path: '/about', component: AboutView,
     }
   ],
 })
