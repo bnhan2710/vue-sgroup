@@ -11,7 +11,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 
-const useauthStore = useAuthStore()
+const authStore = useAuthStore()
 
 const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
@@ -32,25 +32,27 @@ const form = useForm<LoginForm>({
 })
 
 // Get form validation state
-const { isSubmitting } = form
+const { isSubmitting, handleSubmit } = form
+
+const handleFormSubmit = handleSubmit(onSubmit)
 
 async function onSubmit(values: LoginForm) {
   try {
-    const response = await useauthStore.login({
+    const response = await authStore.login({
       email: values.email,
       password: values.password,
     })
 
-    localStorage.setItem('accessToken', response.data?.accessToken)
-
-    toast.success('Login successful!')
-    router.push('/')
-    console.log('Login successful:', response.data)
-  } catch (error) {
+    // toast.success('Login successful!')
+    router.push('/boards')
+  } catch (error: any) {
     console.error('Login failed:', error)
-    toast.error('Login failed. Please try again.')
+    const errorMessage = error?.message || 'Login failed. Please try again.'
+    toast.error(errorMessage)
   }
 }
+
+
 
 defineProps<{
   class?: HTMLAttributes['class']
@@ -64,7 +66,7 @@ defineProps<{
       <CardDescription> Enter your email below to login to your account </CardDescription>
     </CardHeader>
     <CardContent>
-      <form @submit.prevent="form.handleSubmit(onSubmit)" class="space-y-6">
+      <form @submit.prevent="handleFormSubmit" class="space-y-6">
         <FormField v-slot="{ componentField }" name="email">
           <FormItem>
             <FormLabel>Email</FormLabel>
@@ -92,10 +94,16 @@ defineProps<{
         </FormField>
 
         <div class="flex flex-col gap-3">
-          <Button type="submit" class="w-full" :disabled="isSubmitting">
+          <Button 
+            type="submit" 
+            class="w-full" 
+            :disabled="isSubmitting"
+          >
             {{ isSubmitting ? 'Logging in...' : 'Login' }}
           </Button>
-          <Button variant="outline" class="w-full" type="button"> Login with Google </Button>
+          <Button variant="outline" class="w-full" type="button"> 
+            Login with Google 
+          </Button>
         </div>
 
         <div class="mt-4 text-center text-sm">

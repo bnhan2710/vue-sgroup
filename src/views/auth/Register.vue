@@ -45,11 +45,11 @@ const onSubmitHandler = handleSubmit(async (values: RegisterForm) => {
 
 
     const username = values.email.split('@')[0]
-    // await $post('/auth/register', {
-    //   username: username,
-    //   email: values.email,
-    //   password: values.password,
-    // })
+    await $post('/auth/register', {
+      username: username,
+      email: values.email,
+      password: values.password,
+    })
 
 
     await router.push({ name: 'Login' })

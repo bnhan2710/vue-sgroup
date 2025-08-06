@@ -8,9 +8,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(payload: { email: string; password: string }) {
     const response = await $post('auth/login', payload)
-    const { accessToken ,...user } = response.data.data
+    const { accessToken, ...userData } = response.data.data
     token.value = accessToken
-    user.value = user
+    user.value = userData
 
     return response.data
   }

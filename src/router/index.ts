@@ -27,6 +27,22 @@ const router = createRouter({
     {
       name: 'About',
       path: '/about', component: AboutView,
+    },
+    {
+      name: 'Boards',
+      path: '/boards',
+      component: () => import('@/views/boards/BoardDashboard.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      name: 'BoardDetail',
+      path: '/boards/:id',
+      component: () => import('@/views/boards/BoardDetail.vue'),
+      meta: {
+        requiresAuth: true
+      }
     }
   ],
 })
@@ -39,8 +55,7 @@ router.beforeEach(async (to) => {
   if (
     // make sure the user is authenticated
     !authStore.isAuthenticated &&
- 
-    !to.meta.auth
+    to.meta.requiresAuth
   ) 
   {
     // redirect the user to the login page
@@ -51,8 +66,8 @@ router.beforeEach(async (to) => {
     authStore.isAuthenticated &&
     to.meta.auth
   ) {
-    // redirect the user to the home page
-    return { name: 'Home' }
+    // redirect the user to the boards page instead of home
+    return { name: 'Boards' }
   }
 })
 
