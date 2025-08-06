@@ -206,6 +206,8 @@ const totalPages = computed(() => {
   return Math.ceil(boardStore.totalBoards / itemsPerPage)
 })
 
+
+
 // Header content based on active filter
 const headerTitle = computed(() => {
   switch (activeFilter.value) {

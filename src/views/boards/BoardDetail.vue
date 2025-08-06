@@ -62,7 +62,7 @@
       </Button>
     </div>
 
-    <!-- Board Content -->
+      <!-- Board Content -->
     <div v-else class="p-4 overflow-x-auto">
       <div class="flex space-x-4 min-w-max pb-4">
         <!-- Lists -->
