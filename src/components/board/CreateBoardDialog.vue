@@ -146,7 +146,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { useBoardStore } from '@/stores/board'
-import type { CreateBoardDto } from '@/apis/board.api'
+import type { CreateBoardDto } from '@/apis'
 
 interface Props {
   open: boolean

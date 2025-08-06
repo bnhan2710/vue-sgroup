@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { boardApi, type Board, type CreateBoardDto, type UpdateBoardDto } from '@/apis/board.api'
+import { boardService, type Board, type CreateBoardDto, type UpdateBoardDto, type InviteMemberDto, type BoardResponse } from '@/apis'
 import { toast } from 'vue-sonner'
 
 export const useBoardStore = defineStore('board', () => {
@@ -18,7 +18,7 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await boardApi.getMyBoards(params)
+      const response = await boardService.getMyBoards(params)
       boards.value = response.data.boards
       totalBoards.value = response.data.totalBoards
     } catch (err: any) {
@@ -33,7 +33,7 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await boardApi.getBoardById(id)
+      const response = await boardService.getBoardById(id)
       currentBoard.value = response.data.board
       return response.data.board
     } catch (err: any) {
@@ -49,13 +49,13 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await boardApi.createBoard(data)
+      const response = await boardService.createBoard(data)
       toast.success('Create board successfully!')
       
       // Refresh boards list
       await fetchBoards()
       
-      return response.data.boardId
+      return response.data.id
     } catch (err: any) {
       error.value = err.message || 'Something went wrong'
       toast.error('Cannot create board')
@@ -69,7 +69,7 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
-      await boardApi.updateBoard(id, data)
+      await boardService.updateBoard(id, data)
       toast.success('Update board successfully!')
 
       if (currentBoard.value?.id === id) {
@@ -93,7 +93,7 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
-      await boardApi.deleteBoard(id)
+      await boardService.deleteBoard(id)
       toast.success('Xóa Board thành công')
       
       boards.value = boards.value.filter(board => board.id !== id)
@@ -115,7 +115,7 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await boardApi.searchBoards({ search, ...params })
+      const response = await boardService.searchBoards({ search, ...params })
       boards.value = response.data.boards
       totalBoards.value = response.data.totalBoards
     } catch (err: any) {
@@ -130,7 +130,7 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await boardApi.getPublicBoards(params)
+      const response = await boardService.getPublicBoards(params)
       boards.value = response.data.boards
       totalBoards.value = response.data.totalBoards
     } catch (err: any) {
@@ -145,7 +145,7 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await boardApi.getClosedBoards(params)
+      const response = await boardService.getClosedBoards(params)
       boards.value = response.data.boards
       totalBoards.value = response.data.totalBoards
     } catch (err: any) {
@@ -158,7 +158,7 @@ export const useBoardStore = defineStore('board', () => {
 
   async function inviteMember(boardId: string, email: string, roleName: string) {
     try {
-      await boardApi.inviteMember(boardId, { email, roleName })
+      await boardService.inviteMember(boardId, { email, roleName })
       toast.success('Invite member successfully!')
     } catch (err: any) {
       toast.error('Cannot invite member')
@@ -168,7 +168,7 @@ export const useBoardStore = defineStore('board', () => {
 
   async function removeMember(boardId: string, userId: string) {
     try {
-      await boardApi.removeMember(boardId, userId)
+      await boardService.removeMember(boardId, userId)
       toast.success('Delete member successfully!')
     } catch (err: any) {
       toast.error('Cannot delete member')

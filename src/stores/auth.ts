@@ -1,5 +1,5 @@
 import { useLocalStorage } from '@vueuse/core'
-import { $delete, $get, $post } from '@/apis'
+import { authService } from '@/apis'
 import { toast } from 'vue-sonner'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -11,8 +11,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(payload: { email: string; password: string }) {
     try {
-      const response = await $post('auth/login', payload)
-      const { accessToken, refreshToken: newRefreshToken, ...userData } = response.data.data
+      const response = await authService.login(payload)
+      const { accessToken, refreshToken: newRefreshToken, ...userData } = response.data
       
       // Store tokens
       token.value = accessToken
@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
       user.value = userData
 
-      return response.data
+      return response
     } catch (error) {
       console.error('Login error:', error)
       throw error
@@ -81,7 +81,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     try {
       if (token.value) {
-        await $delete('auth/logout')
+        await authService.logout()
       }
     } catch (error) {
       console.error('Logout error:', error)

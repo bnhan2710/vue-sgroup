@@ -204,7 +204,10 @@ async function handleSubmit() {
       type: form.type
     }
     
-    await boardStore.updateBoard(props.board.id, updateData)
+    await boardStore.updateBoard(props.board.id, {
+      ...updateData,
+      type: updateData.type as 'public' | 'private' | undefined
+    })
     emit('updated')
     emit('update:open', false)
   } catch (error) {

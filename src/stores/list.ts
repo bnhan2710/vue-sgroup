@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { listApi, type List, type CreateListDto, type UpdateListDto } from '@/apis/list.api'
+import { listService, type List, type CreateListDto, type UpdateListDto } from '@/apis'
 import { toast } from 'vue-sonner'
 
 export const useListStore = defineStore('list', () => {
@@ -20,7 +20,7 @@ export const useListStore = defineStore('list', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await listApi.getLists(boardId)
+      const response = await listService.getLists(boardId)
       lists.value = response.data
     } catch (err: any) {
       error.value = err.message || 'Something went wrong'
@@ -34,7 +34,7 @@ export const useListStore = defineStore('list', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await listApi.getListById(id)
+      const response = await listService.getListById(id)
       currentList.value = response.data
       return response.data
     } catch (err: any) {
@@ -50,7 +50,7 @@ export const useListStore = defineStore('list', () => {
     try {
       loading.value = true
       error.value = null
-      const response = await listApi.createList(data)
+      const response = await listService.createList(data)
       
       // Add new list to the store
       lists.value.push(response.data)
@@ -70,7 +70,7 @@ export const useListStore = defineStore('list', () => {
     try {
       loading.value = true
       error.value = null
-      await listApi.updateList(id, data)
+      await listService.updateList(id, data)
       
       // Update list in store
       const index = lists.value.findIndex(list => list.id === id)
@@ -97,7 +97,7 @@ export const useListStore = defineStore('list', () => {
     try {
       loading.value = true
       error.value = null
-      await listApi.deleteList(id)
+      await listService.deleteList(id)
       
       // Remove list from store
       lists.value = lists.value.filter(list => list.id !== id)
