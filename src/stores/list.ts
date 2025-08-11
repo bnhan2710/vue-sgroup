@@ -30,6 +30,17 @@ export const useListStore = defineStore('list', () => {
     }
   }
 
+  // Set lists from board response (when board already includes lists)
+  function setListsFromBoard(boardLists: List[]) {
+    lists.value = boardLists || []
+  }
+
+  // Clear all lists
+  function clearLists() {
+    lists.value = []
+    currentList.value = null
+  }
+
   async function fetchListById(id: string) {
     try {
       loading.value = true
@@ -165,6 +176,8 @@ export const useListStore = defineStore('list', () => {
     clearError,
     setCurrentList,
     addList,
-    removeList
+    removeList,
+    setListsFromBoard,
+    clearLists
   }
 })

@@ -40,7 +40,7 @@ export interface InviteMemberDto {
 
 export interface BoardDetail extends Board {
   lists?: any[]
-  members?: any[]
+  boardUsers?: any[]
 }
 
 export interface BoardResponse {

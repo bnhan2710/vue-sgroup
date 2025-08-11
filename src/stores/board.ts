@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { boardService, type Board, type CreateBoardDto, type UpdateBoardDto, type InviteMemberDto, type BoardResponse } from '@/apis'
+import { boardService, type Board, type BoardDetail, type CreateBoardDto, type UpdateBoardDto, type InviteMemberDto, type BoardResponse } from '@/apis'
 import { toast } from 'vue-sonner'
 
 export const useBoardStore = defineStore('board', () => {
   const boards = ref<Board[]>([])
-  const currentBoard = ref<Board | null>(null)
+  const currentBoard = ref<BoardDetail | null>(null)
   const totalBoards = ref(0)
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -33,9 +33,11 @@ export const useBoardStore = defineStore('board', () => {
     try {
       loading.value = true
       error.value = null
+      
       const response = await boardService.getBoardById(id)
-      currentBoard.value = response.data.board
-      return response.data.board
+      currentBoard.value = response.data
+      
+      return response.data
     } catch (err: any) {
       error.value = err.message || 'Something went wrong'
       toast.error('Cannot fetch board')

@@ -41,8 +41,8 @@ export const boardService = {
   /**
    * Get board by ID
    */
-  async getBoardById(id: string): Promise<ApiResponse<{ board: BoardDetail }>> {
-    const response = await apiClient.get<ApiResponse<{ board: BoardDetail }>>(
+  async getBoardById(id: string): Promise<ApiResponse<BoardDetail>> {
+    const response = await apiClient.get<ApiResponse<BoardDetail>>(
       ENDPOINTS.BOARDS.BY_ID(id)
     )
     return response.data

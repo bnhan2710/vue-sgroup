@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
     <!-- Header -->
-    <div class="bg-white/80 backdrop-blur-sm border-b border-gray-200">
+    <div class="bg-white/80 backdrop-blur-sm border-b border-gray-200 flex-shrink-0">
       <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between py-4">
           <div class="flex items-center space-x-4">
@@ -38,7 +38,7 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="boardStore.loading || listStore.loading" class="flex justify-center items-center py-20">
+    <div v-if="boardStore.loading || listStore.loading" class="flex-1 flex justify-center items-center py-20">
       <div class="flex items-center space-x-2">
         <svg class="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="boardStore.error" class="text-center py-20">
+    <div v-else-if="boardStore.error" class="flex-1 text-center py-20">
       <div class="text-red-600 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -63,16 +63,32 @@
     </div>
 
       <!-- Board Content -->
-    <div v-else class="p-4 overflow-x-auto">
-      <div class="flex space-x-4 min-w-max pb-4">
+    <div v-else class="flex-1 overflow-x-auto">
+      <div class="flex space-x-4 min-w-max p-4 pb-4">
         <!-- Lists -->
-        <ListColumn
-          v-for="list in boardLists"
-          :key="list.id"
-          :list="list"
-          @delete="handleDeleteList"
-          @update="handleUpdateList"
-        />
+        <template v-if="boardLists.length > 0">
+          <ListColumn
+            v-for="list in boardLists"
+            :key="`${list.id}-${list.title}`"
+            :list="list"
+            @delete="handleDeleteList"
+            @update="handleUpdateList"
+          />
+        </template>
+        
+        <!-- Empty State -->
+        <div v-else-if="!boardStore.loading" class="flex items-center justify-center w-full py-20 flex-1">
+          <div class="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No lists yet</h3>
+            <p class="text-gray-600 mb-4">Create your first list to get started</p>
+            <Button @click="loadBoardData" variant="outline" class="mt-4">
+              Retry Load Board
+            </Button>
+          </div>
+        </div>
         
         <!-- Add List Column -->
         <div class="bg-gray-200/60 backdrop-blur-sm rounded-lg p-3 w-72 flex-shrink-0">
@@ -139,8 +155,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ListColumn from '@/components/list/ListColumn.vue'
@@ -152,7 +168,6 @@ import { useListStore } from '@/stores/list'
 import type { List } from '@/apis/list.api'
 
 const route = useRoute()
-const router = useRouter()
 const boardStore = useBoardStore()
 const listStore = useListStore()
 
@@ -172,7 +187,16 @@ const listInput = ref<HTMLInputElement>()
 // Computed
 const currentBoard = computed(() => boardStore.currentBoard)
 const boardLists = computed(() => {
-  return listStore.getListsByBoard(boardId.value)
+  // Add safety check to prevent errors when boardId is null
+  if (!boardId.value) return []
+  
+      // First try to get lists from current board (if available)
+    if (currentBoard.value?.lists && currentBoard.value.lists.length > 0) {
+      return currentBoard.value.lists
+    }
+    
+    // Fallback to store lists
+    return listStore.getListsByBoard(boardId.value)
 })
 
 // Load data on mount and route change
@@ -180,21 +204,37 @@ onMounted(() => {
   loadBoardData()
 })
 
-watch(boardId, () => {
-  loadBoardData()
+watch(boardId, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    loadBoardData()
+  }
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  // Clear current board and lists to prevent memory leaks
+  boardStore.setCurrentBoard(null)
+  listStore.clearLists()
 })
 
 async function loadBoardData() {
   if (!boardId.value) return
   
   try {
-    // Load board and lists in parallel
-    await Promise.all([
-      boardStore.fetchBoardById(boardId.value),
-      listStore.fetchLists(boardId.value)
-    ])
+    // Load board (which includes lists)
+    const board = await boardStore.fetchBoardById(boardId.value)
+    
+    // Use nextTick to ensure DOM is updated before setting lists
+    await nextTick()
+    
+    if (board?.lists && board.lists.length > 0) {
+      // Set lists from board response
+      listStore.setListsFromBoard(board.lists)
+    }
   } catch (error) {
     console.error('Failed to load board data:', error)
+    // Clear lists on error to prevent stale data
+    listStore.clearLists()
   }
 }
 
