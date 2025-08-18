@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import { useLocalStorage } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
 import AboutView from '@/views/AboutView.vue'
@@ -22,11 +21,18 @@ const router = createRouter({
     },
     {
       name: 'Home',
-      path: '/' , component: HomeView,
+      path: '/',
+      redirect: { name: 'Boards' },
     },
     {
       name: 'About',
       path: '/about', component: AboutView,
+    },
+    {
+      name: 'Profile',
+      path: '/profile',
+      component: () => import('@/views/user/Profile.vue'),
+      meta: { requiresAuth: true }
     },
     {
       name: 'Boards',

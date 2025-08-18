@@ -33,4 +33,8 @@ export const ENDPOINTS = {
     BASE: '/lists',
     BY_ID: (id: string) => `/lists/${id}`,
   },
+  USERS: {
+    BASE: '/users',
+    BY_ID: (id: string) => `/users/${id}`,
+  },
 } as const

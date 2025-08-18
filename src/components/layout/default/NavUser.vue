@@ -50,6 +50,7 @@ const logout = async () => {
           <SidebarMenuButton
             size="lg"
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            @click="router.push('/profile')"
           >
             <Avatar class="h-8 w-8 rounded-lg">
               <AvatarImage :src="user.avatar" :alt="user.name" />
@@ -89,7 +90,7 @@ const logout = async () => {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/profile')">
               <BadgeCheck />
               Account
             </DropdownMenuItem>

@@ -10,6 +10,7 @@ export { apiClient, axiosClient, $get, $post, $put, $delete, $patch } from './cl
 export { authService } from './services/auth'
 export { boardService } from './services/board'
 export { listService } from './services/list'
+export { userService } from './services/user'
 
 // Legacy exports (for backward compatibility)
 export * from './axios.client'
